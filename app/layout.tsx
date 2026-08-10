@@ -28,9 +28,22 @@ const silverEditorial = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "DermaAI | Personalized Skincare Ingredient Scanner",
-  description:
-    "Advanced AI-powered dermatological analysis for safe and compatible skincare products.",
+  title: "DermaAI | Personalized Skincare Scanner",
+  description: "Advanced AI-powered dermatological analysis for safe and compatible skincare products.",
+  
+  // This helps with SEO and how your link looks when shared
+  openGraph: {
+    title: "DermaAI | Skincare Intelligence",
+    description: "Scan product ingredients against your unique skin profile using Gemini AI.",
+    siteName: "DermaAI",
+    type: "website",
+  },
+  
+  // Customizes the Apple Home Screen appearance
+  appleWebApp: {
+    title: "DermaAI",
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export default function RootLayout({

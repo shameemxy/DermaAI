@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary-text: #4A3E38;
+  --color-primary-bg: #FAF1E8;
+  --color-accent: #D6A87E;
+  --color-surface: #E6D4C3;
+}
+
+body {
+  color: var(--color-primary-text);
+  background-color: var(--color-primary-bg);
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom scrollbar matching DermaAI theme */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FAF1E8;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #E6D4C3;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #D6A87E;
+}
+
+/* Custom Selection Highlight */
+::selection {
+  background-color: #D6A87E;
+  color: #4A3E38;
+}

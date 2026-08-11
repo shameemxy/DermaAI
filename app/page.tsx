@@ -7,41 +7,45 @@ export default function Home() {
     <div className="min-h-screen bg-primaryBG text-primaryText flex flex-col font-sans">
       {/* Top Navbar */}
       <header className="sticky top-0 z-50 bg-primaryBG/90 backdrop-blur-md border-b border-surfaceBorder/40">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 group">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 md:h-20 flex items-center justify-between gap-2">
+          
+          <Link href="/" className="flex items-center gap-2 md:gap-3 group flex-shrink-0">
             <Image 
               src="/logo.png" 
               alt="DermaAI Logo" 
               width={40} 
               height={40} 
-              className="h-10 w-auto object-contain transition-transform group-hover:scale-105" 
+              className="h-8 w-auto md:h-10 object-contain transition-transform group-hover:scale-105" 
               priority 
             />
-            <span className="font-editorial text-2xl font-bold tracking-tight text-primaryText">
+            <span className="font-editorial text-xl md:text-2xl font-bold tracking-tight text-primaryText">
               DermaAI
             </span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-primaryText/80">
+          <nav className="hidden lg:flex items-center gap-8 text-sm font-medium text-primaryText/80">
             <Link href="#features" className="hover:text-primaryText transition-colors">Features</Link>
             <Link href="#how-it-works" className="hover:text-primaryText transition-colors">How It Works</Link>
             <Link href="#safety" className="hover:text-primaryText transition-colors">Safety Standard</Link>
           </nav>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1 sm:gap-4 flex-shrink-0">
             <Link
               href="/login"
-              className="px-5 py-2.5 text-sm font-medium text-primaryText hover:opacity-80 transition-opacity"
+              className="px-3 py-2 md:px-5 md:py-2.5 text-xs md:text-sm font-medium text-primaryText hover:opacity-80 transition-opacity"
             >
               Sign In
             </Link>
             <Link
               href="/signup"
-              className="px-6 py-2.5 rounded-full bg-accent hover:bg-accentHover text-primaryText text-sm font-medium transition-all shadow-derma hover:shadow-derma-lg"
+              className="px-4 py-2 md:px-6 md:py-2.5 rounded-full bg-accent hover:bg-accentHover text-primaryText text-xs md:text-sm font-medium transition-all shadow-derma hover:shadow-derma-lg whitespace-nowrap"
             >
-              Start Free Wizard
+              {/* Shortens the button text on small mobile screens */}
+              <span className="sm:hidden">Start</span>
+              <span className="hidden sm:inline">Start Free Wizard</span>
             </Link>
           </div>
+          
         </div>
       </header>
 

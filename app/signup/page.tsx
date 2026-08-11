@@ -5,20 +5,29 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { supabase, isSupabaseConfigured } from "@/utils/supabase/client";
-import { Lock, Mail, User, ArrowRight, AlertCircle, Sparkles } from "lucide-react";
+import { Lock, Mail, User, ArrowRight, AlertCircle, Sparkles, MailCheck } from "lucide-react";
 
 export default function SignupPage() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState(false);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setErrorMsg(null);
+
+    // 1. Validate Passwords Match
+    if (password !== confirmPassword) {
+      setErrorMsg("Passwords do not match. Please try again.");
+      setLoading(false);
+      return;
+    }
 
     try {
       if (!isSupabaseConfigured()) {
@@ -29,6 +38,7 @@ export default function SignupPage() {
         return;
       }
 
+      // 2. Submit to Supabase and set the redirect URL for the email link
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -36,15 +46,23 @@ export default function SignupPage() {
           data: {
             full_name: name,
           },
+          emailRedirectTo: `${window.location.origin}/wizard`,
         },
       });
 
       if (error) throw error;
 
+      // 3. Handle Email Confirmation State
       if (typeof window !== "undefined") {
         sessionStorage.setItem("derma_user_name", name);
       }
-      router.push("/wizard");
+
+      // If session is null, Supabase requires email confirmation
+      if (data.user && data.session === null) {
+        setSuccessMsg(true);
+      } else {
+        router.push("/wizard");
+      }
       
     } catch (err: any) {
       let finalError = err?.message || "An error occurred during account creation.";
@@ -86,98 +104,136 @@ export default function SignupPage() {
       </header>
 
       <main className="max-w-md w-full mx-auto my-auto py-12">
-        <div className="bg-surfaceCard border border-surfaceBorder rounded-3xl p-8 shadow-derma-lg">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-accent/20 mb-4">
-              <Sparkles className="w-6 h-6 text-primaryText" />
+        {successMsg ? (
+          /* SUCCESS STATE: CHECK INBOX */
+          <div className="bg-surfaceCard border border-surfaceBorder rounded-3xl p-10 shadow-derma-lg text-center animate-fadeIn">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-100/50 mb-6 border border-emerald-200">
+              <MailCheck className="w-10 h-10 text-emerald-700" />
             </div>
-            <h1 className="font-editorial text-3xl font-light text-primaryText mb-2">
-              Create Account
-            </h1>
-            <p className="text-sm text-primaryText/70 font-light">
-              Begin your personalized dermatological safety journey.
+            <h2 className="font-editorial text-3xl font-bold text-primaryText mb-3">
+              Check your inbox
+            </h2>
+            <p className="text-sm text-primaryText/80 font-light mb-6 leading-relaxed">
+              We sent a secure confirmation link to <br/>
+              <strong className="font-medium text-primaryText">{email}</strong>
+            </p>
+            <p className="text-xs text-primaryText/60 font-light bg-surface p-4 rounded-xl border border-surfaceBorder/60">
+              Click the link in the email to activate your account and proceed to the Skin Wizard. <br/><br/>
+              <span className="italic">Don't see it? Check your spam folder.</span>
             </p>
           </div>
-
-          {errorMsg && (
-            <div className="mb-6 p-4 rounded-xl bg-red-100/80 border border-red-200 text-red-800 text-xs flex items-center gap-3">
-              <AlertCircle className="w-5 h-5 flex-shrink-0 text-red-600" />
-              <span>{errorMsg}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleSignup} className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-primaryText/80 mb-1.5">
-                Full Name
-              </label>
-              <div className="relative">
-                <User className="w-4 h-4 text-primaryText/50 absolute left-4 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Sophia Vance"
-                  className="w-full pl-11 pr-4 py-3 rounded-xl bg-surface border border-surfaceBorder text-primaryText placeholder-primaryText/40 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all text-sm"
-                />
+        ) : (
+          /* SIGNUP FORM STATE */
+          <div className="bg-surfaceCard border border-surfaceBorder rounded-3xl p-8 shadow-derma-lg">
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-accent/20 mb-4">
+                <Sparkles className="w-6 h-6 text-primaryText" />
               </div>
+              <h1 className="font-editorial text-3xl font-light text-primaryText mb-2">
+                Create Account
+              </h1>
+              <p className="text-sm text-primaryText/70 font-light">
+                Begin your personalized dermatological safety journey.
+              </p>
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-primaryText/80 mb-1.5">
-                Email Address
-              </label>
-              <div className="relative">
-                <Mail className="w-4 h-4 text-primaryText/50 absolute left-4 top-1/2 -translate-y-1/2" />
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="sophia@example.com"
-                  className="w-full pl-11 pr-4 py-3 rounded-xl bg-surface border border-surfaceBorder text-primaryText placeholder-primaryText/40 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all text-sm"
-                />
+            {errorMsg && (
+              <div className="mb-6 p-4 rounded-xl bg-red-100/80 border border-red-200 text-red-800 text-xs flex items-center gap-3 animate-fadeIn">
+                <AlertCircle className="w-5 h-5 flex-shrink-0 text-red-600" />
+                <span>{errorMsg}</span>
               </div>
-            </div>
+            )}
 
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-primaryText/80 mb-1.5">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="w-4 h-4 text-primaryText/50 absolute left-4 top-1/2 -translate-y-1/2" />
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="At least 6 characters"
-                  className="w-full pl-11 pr-4 py-3 rounded-xl bg-surface border border-surfaceBorder text-primaryText placeholder-primaryText/40 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all text-sm"
-                />
+            <form onSubmit={handleSignup} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-primaryText/80 mb-1.5">
+                  Full Name
+                </label>
+                <div className="relative">
+                  <User className="w-4 h-4 text-primaryText/50 absolute left-4 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="e.g. Sophia Vance"
+                    className="w-full pl-11 pr-4 py-3 rounded-xl bg-surface border border-surfaceBorder text-primaryText placeholder-primaryText/40 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all text-sm"
+                  />
+                </div>
               </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-primaryText/80 mb-1.5">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-primaryText/50 absolute left-4 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="sophia@example.com"
+                    className="w-full pl-11 pr-4 py-3 rounded-xl bg-surface border border-surfaceBorder text-primaryText placeholder-primaryText/40 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all text-sm"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-primaryText/80 mb-1.5">
+                  Password
+                </label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-primaryText/50 absolute left-4 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="At least 6 characters"
+                    className="w-full pl-11 pr-4 py-3 rounded-xl bg-surface border border-surfaceBorder text-primaryText placeholder-primaryText/40 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all text-sm"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-primaryText/80 mb-1.5">
+                  Confirm Password
+                </label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-primaryText/50 absolute left-4 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="password"
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Repeat your password"
+                    className="w-full pl-11 pr-4 py-3 rounded-xl bg-surface border border-surfaceBorder text-primaryText placeholder-primaryText/40 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all text-sm"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full mt-4 py-3.5 px-6 rounded-xl bg-accent hover:bg-accentHover text-primaryText font-medium text-sm transition-all shadow-derma flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {loading ? (
+                  <span>Creating Profile...</span>
+                ) : (
+                  <>
+                    <span>Continue to Skin Wizard</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            <div className="mt-8 text-center text-xs text-primaryText/60 border-t border-surfaceBorder/40 pt-6">
+              By signing up, you agree to DermaAI's Privacy Policy & Terms.
             </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full mt-4 py-3.5 px-6 rounded-xl bg-accent hover:bg-accentHover text-primaryText font-medium text-sm transition-all shadow-derma flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              {loading ? (
-                <span>Creating Profile...</span>
-              ) : (
-                <>
-                  <span>Continue to Skin Wizard</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
-            </button>
-          </form>
-
-          <div className="mt-8 text-center text-xs text-primaryText/60 border-t border-surfaceBorder/40 pt-6">
-            By signing up, you agree to DermaAI&apos;s Privacy Policy & Terms.
           </div>
-        </div>
+        )}
       </main>
 
       <footer className="text-center text-xs text-primaryText/50 py-4">

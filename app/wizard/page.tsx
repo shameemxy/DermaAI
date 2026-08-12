@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { supabase, isSupabaseConfigured } from "@/utils/supabase/client";
-import { Check, ArrowRight, ChevronRight, Droplets, Sun, AlertTriangle } from "lucide-react";
+import { Check, ArrowRight, ChevronRight, Droplets, Sun, AlertTriangle, Target, ShieldAlert, Cloud } from "lucide-react";
 
 const SKIN_TYPES = [
   { id: "Oily", title: "Oily", desc: "Prone to shine, enlarged pores, and excess sebum production." },
@@ -19,6 +19,27 @@ const SKIN_SHADES = [
   { id: "Medium", title: "Medium / Sand", color: "#E0B388", border: "#C99A6E" },
   { id: "Olive", title: "Olive / Tan", color: "#C68E5D", border: "#AD7646" },
   { id: "Deep", title: "Deep / Bronze", color: "#794E32", border: "#5E3921" },
+];
+
+const SKIN_GOALS = [
+  "Clearing Breakouts & Acne",
+  "Anti-Aging & Fine Lines",
+  "Fading Hyperpigmentation",
+  "Calming Redness & Rosacea",
+  "Enhancing Glow & Hydration"
+];
+
+const BARRIER_HEALTH = [
+  { id: "Resilient", title: "Resilient", desc: "Can handle strong actives and exfoliants well." },
+  { id: "Normal", title: "Normal", desc: "Reacts normally, occasional mild stinging with new harsh products." },
+  { id: "Compromised", title: "Compromised", desc: "Currently feels tight, stinging, or peeling. Needs extreme gentle care." }
+];
+
+const CLIMATES = [
+  { id: "Hot & Humid", title: "Hot & Humid", desc: "High moisture in the air, prone to sweating." },
+  { id: "Cold & Dry", title: "Cold & Dry", desc: "Low humidity, indoor heating, strips skin moisture." },
+  { id: "Moderate", title: "Moderate / Balanced", desc: "Mild, balanced environment." },
+  { id: "Polluted", title: "High Urban Pollution", desc: "City environment, needs heavy antioxidant protection." }
 ];
 
 const ALLERGY_OPTIONS = [
@@ -44,6 +65,9 @@ export default function WizardPage() {
   const [name, setName] = useState("");
   const [skinType, setSkinType] = useState<string>("Combo");
   const [skinShade, setSkinShade] = useState<string>("Medium");
+  const [skinGoals, setSkinGoals] = useState<string[]>([]);
+  const [barrierHealth, setBarrierHealth] = useState<string>("Normal");
+  const [climate, setClimate] = useState<string>("Moderate");
   const [selectedAllergies, setSelectedAllergies] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -62,6 +86,14 @@ export default function WizardPage() {
     }
   };
 
+  const toggleGoal = (goal: string) => {
+    if (skinGoals.includes(goal)) {
+      setSkinGoals(skinGoals.filter((item) => item !== goal));
+    } else {
+      setSkinGoals([...skinGoals, goal]);
+    }
+  };
+
   const handleFinishWizard = async () => {
     setLoading(true);
 
@@ -69,6 +101,9 @@ export default function WizardPage() {
       name: name || "Derma User",
       skin_type: skinType,
       skin_shade: skinShade,
+      skin_goals: skinGoals,
+      barrier_health: barrierHealth,
+      climate: climate,
       allergies: selectedAllergies,
       updated_at: new Date().toISOString(),
     };
@@ -86,6 +121,9 @@ export default function WizardPage() {
             name: profileData.name,
             skin_type: profileData.skin_type,
             skin_shade: profileData.skin_shade,
+            skin_goals: profileData.skin_goals,
+            barrier_health: profileData.barrier_health,
+            climate: profileData.climate,
             allergies: profileData.allergies,
             updated_at: profileData.updated_at,
           });
@@ -114,15 +152,15 @@ export default function WizardPage() {
             height={36} 
             className="h-9 w-auto object-contain" 
           />
-          <span className="font-editorial text-2xl font-bold tracking-tight text-primaryText">
+          <span className="font-editorial text-2xl font-bold tracking-tight text-primaryText hidden sm:inline">
             DermaAI Profile Setup
           </span>
         </div>
 
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-primaryText/70">
-          <span>Step {step} of 3</span>
+          <span>Step {step} of 6</span>
           <div className="flex gap-1.5 ml-2">
-            {[1, 2, 3].map((i) => (
+            {[1, 2, 3, 4, 5, 6].map((i) => (
               <div
                 key={i}
                 className={`h-2 rounded-full transition-all ${
@@ -141,18 +179,19 @@ export default function WizardPage() {
       <main className="max-w-2xl w-full mx-auto my-auto py-8">
         <div className="bg-surfaceCard border border-surfaceBorder rounded-3xl p-8 md:p-10 shadow-derma-lg">
           
+          {/* STEP 1: SKIN TYPE */}
           {step === 1 && (
-            <div className="space-y-6">
+            <div className="space-y-6 animate-fadeIn">
               <div>
                 <span className="text-xs uppercase tracking-widest text-primaryText/70 font-semibold flex items-center gap-1.5 mb-2">
                   <Droplets className="w-3.5 h-3.5 text-accent" />
-                  Personal Dermatology Profile
+                  Base Dermatology Profile
                 </span>
                 <h1 className="font-editorial text-3xl md:text-4xl font-light text-primaryText mb-2">
                   What is your primary Skin Type?
                 </h1>
                 <p className="text-sm text-primaryText/70 font-light">
-                  Select the description that best reflects your skin barrier state.
+                  Select the description that best reflects your natural oil production.
                 </p>
               </div>
 
@@ -211,8 +250,9 @@ export default function WizardPage() {
             </div>
           )}
 
+          {/* STEP 2: SKIN SHADE */}
           {step === 2 && (
-            <div className="space-y-6">
+            <div className="space-y-6 animate-fadeIn">
               <div>
                 <span className="text-xs uppercase tracking-widest text-primaryText/70 font-semibold flex items-center gap-1.5 mb-2">
                   <Sun className="w-3.5 h-3.5 text-accent" />
@@ -222,7 +262,7 @@ export default function WizardPage() {
                   Select your Skin Shade
                 </h1>
                 <p className="text-sm text-primaryText/70 font-light">
-                  This helps evaluate active ingredient absorption and hyperpigmentation sensitivities.
+                  This helps AI evaluate hyperpigmentation risks and active ingredient tolerances.
                 </p>
               </div>
 
@@ -262,15 +302,205 @@ export default function WizardPage() {
                   onClick={() => setStep(3)}
                   className="px-8 py-3.5 rounded-full bg-accent hover:bg-accentHover text-primaryText font-medium text-sm transition-all shadow-derma flex items-center gap-2"
                 >
-                  <span>Next: Allergies & Sensitivities</span>
+                  <span>Next: Goals</span>
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
           )}
 
+          {/* STEP 3: SKIN GOALS */}
           {step === 3 && (
-            <div className="space-y-6">
+            <div className="space-y-6 animate-fadeIn">
+              <div>
+                <span className="text-xs uppercase tracking-widest text-primaryText/70 font-semibold flex items-center gap-1.5 mb-2">
+                  <Target className="w-3.5 h-3.5 text-accent" />
+                  Objective Mapping
+                </span>
+                <h1 className="font-editorial text-3xl md:text-4xl font-light text-primaryText mb-2">
+                  What are your primary Skin Goals?
+                </h1>
+                <p className="text-sm text-primaryText/70 font-light">
+                  Select the main concerns you want to address. This helps AI suggest whether ingredients will help or hinder your routine.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3 py-4">
+                {SKIN_GOALS.map((goal) => {
+                  const isSelected = skinGoals.includes(goal);
+                  return (
+                    <button
+                      key={goal}
+                      type="button"
+                      onClick={() => toggleGoal(goal)}
+                      className={`w-full p-4 rounded-2xl border text-left transition-all flex items-center gap-4 ${
+                        isSelected
+                          ? "bg-accent border-accent text-primaryText shadow-sm"
+                          : "bg-surface border-surfaceBorder text-primaryText/80 hover:bg-surface/80 hover:text-primaryText"
+                      }`}
+                    >
+                      <div className={`w-5 h-5 rounded flex items-center justify-center border ${isSelected ? 'bg-primaryText border-primaryText text-accent' : 'border-surfaceBorder bg-surfaceCard'}`}>
+                        {isSelected && <Check className="w-3.5 h-3.5" />}
+                      </div>
+                      <span className="font-medium text-sm">{goal}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="pt-4 flex items-center justify-between border-t border-surfaceBorder/40">
+                <button
+                  type="button"
+                  onClick={() => setStep(2)}
+                  className="px-6 py-3 rounded-full text-xs font-semibold text-primaryText/80 hover:text-primaryText"
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStep(4)}
+                  className="px-8 py-3.5 rounded-full bg-accent hover:bg-accentHover text-primaryText font-medium text-sm transition-all shadow-derma flex items-center gap-2"
+                >
+                  <span>Next: Barrier Health</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 4: BARRIER HEALTH */}
+          {step === 4 && (
+            <div className="space-y-6 animate-fadeIn">
+              <div>
+                <span className="text-xs uppercase tracking-widest text-primaryText/70 font-semibold flex items-center gap-1.5 mb-2">
+                  <ShieldAlert className="w-3.5 h-3.5 text-accent" />
+                  Current State
+                </span>
+                <h1 className="font-editorial text-3xl md:text-4xl font-light text-primaryText mb-2">
+                  How is your Skin Barrier right now?
+                </h1>
+                <p className="text-sm text-primaryText/70 font-light">
+                  If your barrier is currently compromised, AI will flag harsh exfoliants and highly active ingredients.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 pt-2">
+                {BARRIER_HEALTH.map((barrier) => (
+                  <button
+                    key={barrier.id}
+                    type="button"
+                    onClick={() => setBarrierHealth(barrier.id)}
+                    className={`w-full p-4 rounded-2xl border text-left transition-all flex items-center justify-between ${
+                      barrierHealth === barrier.id
+                        ? "bg-accent/20 border-accent shadow-sm"
+                        : "bg-surface border-surfaceBorder/60 hover:bg-surface/80"
+                    }`}
+                  >
+                    <div>
+                      <h4 className="font-editorial text-lg font-medium text-primaryText">
+                        {barrier.title}
+                      </h4>
+                      <p className="text-xs text-primaryText/70 font-light mt-0.5">
+                        {barrier.desc}
+                      </p>
+                    </div>
+                    {barrierHealth === barrier.id && (
+                      <div className="w-6 h-6 rounded-full bg-accent text-primaryText flex items-center justify-center flex-shrink-0">
+                        <Check className="w-4 h-4" />
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              <div className="pt-4 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setStep(3)}
+                  className="px-6 py-3 rounded-full text-xs font-semibold text-primaryText/80 hover:text-primaryText"
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStep(5)}
+                  className="px-8 py-3.5 rounded-full bg-accent hover:bg-accentHover text-primaryText font-medium text-sm transition-all shadow-derma flex items-center gap-2"
+                >
+                  <span>Next: Environment</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 5: CLIMATE & ENVIRONMENT */}
+          {step === 5 && (
+            <div className="space-y-6 animate-fadeIn">
+              <div>
+                <span className="text-xs uppercase tracking-widest text-primaryText/70 font-semibold flex items-center gap-1.5 mb-2">
+                  <Cloud className="w-3.5 h-3.5 text-accent" />
+                  Environmental Factors
+                </span>
+                <h1 className="font-editorial text-3xl md:text-4xl font-light text-primaryText mb-2">
+                  What is your daily climate like?
+                </h1>
+                <p className="text-sm text-primaryText/70 font-light">
+                  Humectants behave differently in dry vs. humid air. The AI adjusts product compatibility based on your environment.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 pt-2">
+                {CLIMATES.map((env) => (
+                  <button
+                    key={env.id}
+                    type="button"
+                    onClick={() => setClimate(env.id)}
+                    className={`w-full p-4 rounded-2xl border text-left transition-all flex items-center justify-between ${
+                      climate === env.id
+                        ? "bg-accent/20 border-accent shadow-sm"
+                        : "bg-surface border-surfaceBorder/60 hover:bg-surface/80"
+                    }`}
+                  >
+                    <div>
+                      <h4 className="font-editorial text-lg font-medium text-primaryText">
+                        {env.title}
+                      </h4>
+                      <p className="text-xs text-primaryText/70 font-light mt-0.5">
+                        {env.desc}
+                      </p>
+                    </div>
+                    {climate === env.id && (
+                      <div className="w-6 h-6 rounded-full bg-accent text-primaryText flex items-center justify-center flex-shrink-0">
+                        <Check className="w-4 h-4" />
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              <div className="pt-4 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setStep(4)}
+                  className="px-6 py-3 rounded-full text-xs font-semibold text-primaryText/80 hover:text-primaryText"
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStep(6)}
+                  className="px-8 py-3.5 rounded-full bg-accent hover:bg-accentHover text-primaryText font-medium text-sm transition-all shadow-derma flex items-center gap-2"
+                >
+                  <span>Next: Allergies</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 6: ALLERGIES & SENSITIVITIES */}
+          {step === 6 && (
+            <div className="space-y-6 animate-fadeIn">
               <div>
                 <span className="text-xs uppercase tracking-widest text-primaryText/70 font-semibold flex items-center gap-1.5 mb-2">
                   <AlertTriangle className="w-3.5 h-3.5 text-accent" />
@@ -314,7 +544,7 @@ export default function WizardPage() {
               <div className="pt-4 flex items-center justify-between border-t border-surfaceBorder/40">
                 <button
                   type="button"
-                  onClick={() => setStep(2)}
+                  onClick={() => setStep(5)}
                   className="px-6 py-3 rounded-full text-xs font-semibold text-primaryText/80 hover:text-primaryText"
                 >
                   Back

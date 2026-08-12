@@ -3,12 +3,15 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { supabase, isSupabaseConfigured } from "@/utils/supabase/client";
-import { User, Droplets, Sun, AlertTriangle, Lock, Sliders, ArrowLeft, ShieldCheck } from "lucide-react";
+import { User, Droplets, Sun, AlertTriangle, Lock, Sliders, ArrowLeft, ShieldCheck, Target, ShieldAlert, Cloud } from "lucide-react";
 
 interface UserProfile {
   name?: string;
   skin_type?: string;
   skin_shade?: string;
+  skin_goals?: string[];
+  barrier_health?: string;
+  climate?: string;
   allergies?: string[];
   updated_at?: string;
 }
@@ -25,6 +28,9 @@ export default function ProfilePage() {
     name: "Derma AI User",
     skin_type: "Combo",
     skin_shade: "Medium",
+    skin_goals: [],
+    barrier_health: "Normal",
+    climate: "Moderate",
     allergies: ["Synthetic Fragrance", "Parabens & Preservatives", "Sulfates (SLS/SLES)"],
     updated_at: new Date().toISOString(),
   });
@@ -90,7 +96,7 @@ export default function ProfilePage() {
             </span>
           </div>
           <p className="text-sm text-primaryText/70 font-light mt-1">
-            Personal dermatological characteristics used by Gemini AI scanning engine.
+            Personal dermatological characteristics used by the Gemini AI scanning engine.
           </p>
         </div>
 
@@ -138,66 +144,96 @@ export default function ProfilePage() {
           {/* Details Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
-            {/* Skin Type Read-Only Card */}
+            {/* Skin Type */}
             <div className="bg-surfaceCard border border-surfaceBorder rounded-3xl p-6 md:p-8 shadow-derma space-y-4">
-              <div className="flex items-center justify-between border-b border-surfaceBorder/60 pb-4">
-                <div className="flex items-center gap-2 text-primaryText font-editorial text-xl font-medium">
-                  <Droplets className="w-5 h-5 text-accent" />
-                  <span>Skin Barrier Type</span>
-                </div>
-                <span className="text-xs uppercase tracking-wider font-semibold text-primaryText/60">Read-Only</span>
+              <div className="flex items-center gap-2 text-primaryText font-editorial text-xl font-medium border-b border-surfaceBorder/60 pb-4">
+                <Droplets className="w-5 h-5 text-accent" />
+                <span>Skin Type</span>
               </div>
-
               <div className="p-4 rounded-2xl bg-surface border border-surfaceBorder/60 flex items-center justify-between">
                 <span className="font-editorial text-2xl font-bold text-primaryText">
-                  {profile.skin_type || "Combo"} Skin
-                </span>
-                <span className="px-3 py-1 rounded-full bg-accent/20 border border-accent/40 text-xs font-semibold">
-                  Active
+                  {profile.skin_type || "Combo"}
                 </span>
               </div>
-              <p className="text-xs text-primaryText/70 font-light leading-relaxed">
-                Your skin type dictates active ingredient tolerance, moisture retention requirements, and optimal pH balance during scanning.
-              </p>
             </div>
 
-            {/* Skin Shade Read-Only Card */}
+            {/* Barrier Health */}
             <div className="bg-surfaceCard border border-surfaceBorder rounded-3xl p-6 md:p-8 shadow-derma space-y-4">
-              <div className="flex items-center justify-between border-b border-surfaceBorder/60 pb-4">
-                <div className="flex items-center gap-2 text-primaryText font-editorial text-xl font-medium">
-                  <Sun className="w-5 h-5 text-accent" />
-                  <span>Complexion Shade</span>
-                </div>
-                <span className="text-xs uppercase tracking-wider font-semibold text-primaryText/60">Read-Only</span>
+              <div className="flex items-center gap-2 text-primaryText font-editorial text-xl font-medium border-b border-surfaceBorder/60 pb-4">
+                <ShieldAlert className="w-5 h-5 text-accent" />
+                <span>Barrier Health</span>
               </div>
+              <div className="p-4 rounded-2xl bg-surface border border-surfaceBorder/60 flex items-center justify-between">
+                <span className="font-editorial text-2xl font-bold text-primaryText">
+                  {profile.barrier_health || "Normal"}
+                </span>
+              </div>
+            </div>
 
+            {/* Skin Shade */}
+            <div className="bg-surfaceCard border border-surfaceBorder rounded-3xl p-6 md:p-8 shadow-derma space-y-4">
+              <div className="flex items-center gap-2 text-primaryText font-editorial text-xl font-medium border-b border-surfaceBorder/60 pb-4">
+                <Sun className="w-5 h-5 text-accent" />
+                <span>Complexion Shade</span>
+              </div>
               <div className="p-4 rounded-2xl bg-surface border border-surfaceBorder/60 flex items-center gap-4">
                 <div
                   className="w-10 h-10 rounded-full border-2 shadow-sm flex-shrink-0"
                   style={{ backgroundColor: shadeInfo.color, borderColor: shadeInfo.border }}
                 />
-                <div>
-                  <span className="font-editorial text-2xl font-bold text-primaryText block">
-                    {profile.skin_shade || "Medium"} Tone
-                  </span>
-                  <span className="text-xs text-primaryText/60">Hyperpigmentation risk factor monitoring</span>
-                </div>
+                <span className="font-editorial text-2xl font-bold text-primaryText block">
+                  {profile.skin_shade || "Medium"}
+                </span>
               </div>
-              <p className="text-xs text-primaryText/70 font-light leading-relaxed">
-                Shade evaluation assists in flagging harsh exfoliating acids that risk post-inflammatory hyperpigmentation.
-              </p>
+            </div>
+
+            {/* Climate & Environment */}
+            <div className="bg-surfaceCard border border-surfaceBorder rounded-3xl p-6 md:p-8 shadow-derma space-y-4">
+              <div className="flex items-center gap-2 text-primaryText font-editorial text-xl font-medium border-b border-surfaceBorder/60 pb-4">
+                <Cloud className="w-5 h-5 text-accent" />
+                <span>Climate</span>
+              </div>
+              <div className="p-4 rounded-2xl bg-surface border border-surfaceBorder/60 flex items-center justify-between">
+                <span className="font-editorial text-2xl font-bold text-primaryText">
+                  {profile.climate || "Moderate"}
+                </span>
+              </div>
             </div>
 
           </div>
 
-          {/* Allergies & Sensitivities Read-Only Section */}
+          {/* Skin Goals Section */}
+          <div className="bg-surfaceCard border border-surfaceBorder rounded-3xl p-6 md:p-8 shadow-derma space-y-4">
+            <div className="flex items-center gap-2 text-primaryText font-editorial text-xl font-medium border-b border-surfaceBorder/60 pb-4">
+              <Target className="w-5 h-5 text-accent" />
+              <span>Primary Skin Goals</span>
+            </div>
+            {profile.skin_goals && profile.skin_goals.length > 0 ? (
+              <div className="flex flex-wrap gap-2.5 pt-2">
+                {profile.skin_goals.map((goal) => (
+                  <span
+                    key={goal}
+                    className="px-4 py-2.5 rounded-full text-xs font-semibold bg-surface border border-surfaceBorder text-primaryText shadow-sm"
+                  >
+                    {goal}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-primaryText/60 font-light py-2">
+                No specific goals configured.
+              </p>
+            )}
+          </div>
+
+          {/* Allergies & Sensitivities Section */}
           <div className="bg-surfaceCard border border-surfaceBorder rounded-3xl p-6 md:p-8 shadow-derma space-y-4">
             <div className="flex items-center justify-between border-b border-surfaceBorder/60 pb-4">
               <div className="flex items-center gap-2 text-primaryText font-editorial text-xl font-medium">
                 <AlertTriangle className="w-5 h-5 text-accent" />
                 <span>Flagged Allergies & Sensitivities</span>
               </div>
-              <span className="text-xs uppercase tracking-wider font-semibold text-accent">
+              <span className="text-xs uppercase tracking-wider font-semibold text-accent hidden sm:block">
                 {profile.allergies?.length || 0} Triggers Active
               </span>
             </div>
@@ -219,13 +255,6 @@ export default function ProfilePage() {
                 No specific ingredient sensitivities configured. Re-run the wizard to add known allergens.
               </p>
             )}
-
-            <div className="mt-6 pt-4 border-t border-surfaceBorder/40 text-xs text-primaryText/60 flex items-center justify-between">
-              <span>Gemini API strictly flags products containing any listed items as <strong>Not Compatible</strong>.</span>
-              <Link href="/wizard" className="font-semibold text-primaryText underline hover:text-accent">
-                Edit Sensitivities
-              </Link>
-            </div>
           </div>
 
         </div>
